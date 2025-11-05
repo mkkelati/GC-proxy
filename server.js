@@ -34,6 +34,19 @@ proxy.on("error", (err, req, res) => {
 });
 
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log("Proxy for /app130 running on port " + PORT);
+});
+
+// Handle WebSocket upgrade requests
+server.on("upgrade", (req, socket, head) => {
+  console.log("WebSocket upgrade request to:", req.url);
+  
+  if (req.url.startsWith("/app130")) {
+    // Rewrite the URL: remove /app130 prefix
+    req.url = req.url.replace(/^\/app130/, '') || '/';
+    proxy.ws(req, socket, head, { target: TARGET });
+  } else {
+    socket.destroy();
+  }
 });
