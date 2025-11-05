@@ -8,7 +8,7 @@ const proxy = httpProxy.createProxyServer({
 });
 
 // VPS or backend with SSL WebSocket/SSH support
-const TARGET = "https://172.236.172.178:443";
+const TARGET = "wss://172.236.172.178:443";
 
 // Only handle /app130 path and strip it before forwarding
 app.all("/app130", (req, res) => {
