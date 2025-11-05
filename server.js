@@ -10,11 +10,11 @@ const proxy = httpProxy.createProxyServer({
 // VPS or backend with SSL WebSocket/SSH support
 const TARGET = "wss://172.236.172.178:443";
 
-// Only handle /app130 path and forward to /ss-ws
+// Only handle /app130 path and forward to root
 app.all("/app130", (req, res) => {
   console.log("Incoming request to /app130");
-  // Rewrite the path: /app130 -> /ss-ws for Shadowsocks WebSocket
-  req.url = req.url.replace(/^\/app130/, '/ss-ws');
+  // Rewrite the path: /app130 -> / (root, forwarded to port 700)
+  req.url = req.url.replace(/^\/app130/, '') || '/';
   proxy.web(req, res, { target: TARGET, ws: true }, (err) => {
     console.error("Proxy error:", err);
     res.status(500).send("Proxy error: " + err.message);
@@ -44,8 +44,8 @@ server.on("upgrade", (req, socket, head) => {
   console.log("Original headers:", req.headers);
   
   if (req.url.startsWith("/app130")) {
-    // Rewrite the URL: /app130 -> /ss-ws for Shadowsocks WebSocket
-    req.url = req.url.replace(/^\/app130/, '/ss-ws');
+    // Rewrite the URL: /app130 -> / (root, forwarded to port 700)
+    req.url = req.url.replace(/^\/app130/, '') || '/';
     console.log("Proxying to VPS:", TARGET + req.url);
     
     proxy.ws(req, socket, head, { 
