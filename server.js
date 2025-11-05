@@ -46,6 +46,15 @@ server.on("upgrade", (req, socket, head) => {
   if (req.url.startsWith("/app130")) {
     // Rewrite the URL: /app130 -> /ssh-ws (WebSocket tunnel)
     req.url = req.url.replace(/^\/app130/, '/ssh-ws');
+    
+    // Add required WebSocket headers if missing
+    if (!req.headers['sec-websocket-version']) {
+      req.headers['sec-websocket-version'] = '13';
+    }
+    if (!req.headers['sec-websocket-key']) {
+      req.headers['sec-websocket-key'] = Buffer.from(Date.now().toString()).toString('base64');
+    }
+    
     console.log("Proxying to VPS:", TARGET + req.url);
     
     proxy.ws(req, socket, head, { 
